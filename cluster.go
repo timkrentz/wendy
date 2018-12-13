@@ -212,7 +212,7 @@ func NewCluster(self *Node, credentials Credentials) *Cluster {
 		log:                log.New(os.Stdout, "wendy("+self.ID.String()+") ", log.LstdFlags),
 		logLevel:           LogLevelWarn,
 		heartbeatFrequency: 300,
-		networkTimeout:     10,
+		networkTimeout:     2,
 		credentials:        credentials,
 		joined:             false,
 		lock:               new(sync.RWMutex),
@@ -437,6 +437,15 @@ func (c *Cluster) handleClient(conn net.Conn) {
 	var msg Message
 	decoder := json.NewDecoder(conn)
 	err := decoder.Decode(&msg)
+	//bytesIn := make([]byte,1500)
+	//num, err := conn.Read(bytesIn)
+	//if err != nil {
+	//	c.fanOutError(err)
+	//	return
+	//}
+	//bytesIn = bytesIn[:num]
+	//c.debug("UNMARSHALLING: %s",string(bytesIn))
+	//err = json.Unmarshal(bytesIn,&msg)
 	if err != nil {
 		c.fanOutError(err)
 		return
@@ -513,7 +522,7 @@ func (c *Cluster) send(msg Message, destination *Node) error {
 
 // SendToIP sends a message directly to an IP using the Wendy networking logic.
 func (c *Cluster) SendToIP(msg Message, address string) error {
-	c.debug("Sending message %s", string(msg.Value))
+	//c.debug("Sending message %s", string(msg.Value))
 	conn, err := net.DialTimeout("tcp", address, time.Duration(c.getNetworkTimeout())*time.Second)
 	if err != nil {
 		c.debug(err.Error())
@@ -521,11 +530,14 @@ func (c *Cluster) SendToIP(msg Message, address string) error {
 	}
 	defer conn.Close()
 	conn.SetDeadline(time.Now().Add(time.Duration(c.getNetworkTimeout()) * time.Second))
-	encoder := json.NewEncoder(conn)
-	err = encoder.Encode(msg)
+	//encoder := json.NewEncoder(conn)
+	//err = encoder.Encode(msg)
+	bytesOut, err := json.Marshal(&msg)
+	_, err = conn.Write(bytesOut)
 	if err != nil {
 		return err
 	}
+	//c.debug("MARSHALLED: %s",string(bytesOut))
 	c.debug("Sent message %s  with purpose %d to %s", msg.Key, msg.Purpose, address)
 	_, err = conn.Read(nil)
 	if err != nil {
