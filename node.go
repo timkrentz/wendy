@@ -17,7 +17,7 @@ type Node struct {
 	proximity              int64
 	mutex                  *sync.RWMutex // lock and unlock a Node for concurrency safety
 	lastHeardFrom          time.Time     // The last time we heard from this node
-	leafsetVersion         uint32        // the version number of the leafset
+	leafsetVersion         uint32	     // the version number of the leafset
 	routingTableVersion    uint32        // the version number of the routing table
 	neighborhoodSetVersion uint32        // the version number of the neighborhood set
 }
