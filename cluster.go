@@ -615,15 +615,15 @@ func (c *Cluster) onNodeAnnounce(msg Message) {
 		c.debug("Expected NSVersion %d, got %d", c.self.neighborhoodSetVersion, msg.NSVersion)
 		conflicts = conflicts | nS
 	}
-	if conflicts > 0 {
-		c.debug("Uh oh, %s hit a race condition. Resending state.", msg.Key)
-		err := c.sendRaceNotification(msg.Sender, StateMask{Mask: conflicts})
-		if err != nil {
-			c.fanOutError(err)
-		}
-		return
-	}
-	c.debug("No conflicts!")
+	//if conflicts > 0 {
+	//	c.debug("Uh oh, %s hit a race condition. Resending state.", msg.Key)
+	//	err := c.sendRaceNotification(msg.Sender, StateMask{Mask: conflicts})
+	//	if err != nil {
+	//		c.fanOutError(err)
+	//	}
+	//	return
+	//}
+	//c.debug("No conflicts!")
 	err := c.insertMessage(msg)
 	if err != nil {
 		c.fanOutError(err)
